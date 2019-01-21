@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ServidorWeb BBB</title>
+    <h1 align="center">App de monitoreo de sem&aacute;foros </h1>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        //Establecimiento de conexión con el servidor
+        var socket = io.connect();
+        //Variable utilizada por luz verde2 y pulsadores web
+        var vS2 = 0;
+        //Función que recibe el estado de la luz roja1
+        socket.on('red1', luzRojaS1);
+        //Cambia tono de luz roja1 y texto de pantalla1 en página web
+        function luzRojaS1(data) {
+            var rS1 = JSON.parse(data);
+            if (rS1 == 1) {
+                document.getElementById('c1').style.backgroundColor = 'red';
+                document.getElementById('e1').style.backgroundColor = 'red';
+                document.getElementById("scr1").innerHTML = "Presione pulsador";
+                document.getElementById("scr2").innerHTML = "Presione pulsador";
+            } else {
+                document.getElementById("c1").style.backgroundColor = '#570101';
+                document.getElementById('e1').style.backgroundColor = '#570101';
+            }
+        };
+        //Función que recibe el estado de la luz verde1
+        socket.on('green1', luzVerdeS1);
+        //Cambia tono de luz verde1 y texto de pantalla1 en página web
+        function luzVerdeS1(data) {
+            vS1 = JSON.parse(data);
+            if (vS1 == 1) {
+                document.getElementById('c2').style.backgroundColor = '#24E11D';
+                document.getElementById('e2').style.backgroundColor = '#24E11D';
+                document.getElementById("scr1").innerHTML = "Continue";
+                document.getElementById("scr2").innerHTML = "Continue";
+            } else {
+                document.getElementById("c2").style.backgroundColor = '#023105';
+                document.getElementById("e2").style.backgroundColor = '#023105';
+            }
+        };
+        //Función que recibe el estado de la luz roja2
+        socket.on('red2', luzRojaS2);
+        //Cambia tono de luz roja2
+        function luzRojaS2(data) {
+            var rS2 = JSON.parse(data);
+            if (rS2 == 1) {
+                document.getElementById('d1').style.backgroundColor = 'red';
+            } else {
+                document.getElementById("d1").style.backgroundColor = '#570101';
+            }
+        };
+        //Función que recibe el estado de la luz amarilla2
+        socket.on('yellow2', luzAmarillaS2);
+        //Cambia tono de luz amarilla2
+        function luzAmarillaS2(data) {
+            var aS2 = JSON.parse(data);
+            if (aS2 == 1) {
+                document.getElementById('d2').style.backgroundColor = 'yellow';
+            } else {
+                document.getElementById("d2").style.backgroundColor = '#5F5B02';
+            }
+        };
+        //Función que recibe el estado de la luz verde2
+        socket.on('green2', luzVerdeS2);
+        //Cambia tono de luz verde2
+        function luzVerdeS2(data) {
+            vS2 = JSON.parse(data);
+            if (vS2 == 1) {
+                document.getElementById('d3').style.backgroundColor = '#24E11D';
+            } else {
+                document.getElementById("d3").style.backgroundColor = '#023105';
+            }
+        };
+        //Función que recibe el estado del pulsador físico 1
+        socket.on('lecturaPulsador1', lecturaP1);
+        //Modifica el texto mostrado en el pulsador web 1
+        function lecturaP1(data) {
+            var p1 = JSON.parse(data);
+            if (p1 == 1) {
+                document.getElementById("p1").innerHTML = "Pulsado";
+            } else {
+                document.getElementById("p1").innerHTML = "Pulse";
+            }
+        };
+        //Función que recibe el estado del pulsador físico 2
+        socket.on('lecturaPulsador2', lecturaP2);
+        //Modifica el texto mostrado en el pulsador web 2
+        function lecturaP2(data) {
+            var p2 = JSON.parse(data);
+            if (p2 == 1) {
+                document.getElementById("p2").innerHTML = "Pulsado";
+            } else {
+                document.getElementById("p2").innerHTML = "Pulse";
+            }
+        };
+        //Función que recibe el estado de la variable "contador"
+        socket.on('vContador', tvContador);
+        //Función que muestra en pantalla el estado de la variable "contador"
+        function tvContador(data) {
+            var c = JSON.parse(data);
+            document.getElementById("contador").innerHTML = "Contador " + c;
+        };
+        //Función de pulsador web 1, que emite su estado y cambia su texto
+        function acortar1(a1) {
+            document.getElementById("p1").innerHTML = "Pulsado";
+            if (vS2 == 1) {
+            //Función que emite el estado del pulsador web 1
+            socket.emit('pulsadorWeb1', a1);
+            }    
+        };
+        //Función de pulsador web 2, que emite su estado y cambia su texto
+        function acortar2(a2) {
+             document.getElementById("p2").innerHTML = "Pulsado";
+             if (vS2 == 1){
+             //Función que emite el estado del pulsador web 2
+             socket.emit('pulsadorWeb2', a2);
+            }
+        };
+        //Función que modifica la relación de tiempos entre semáforos
+        function cambio() {
+            lista = document.formulario.alternativa
+            elegido = lista.selectedIndex
+            opcion = lista.options[elegido]
+            alternativa = opcion.value
+            if (alternativa == 1) {
+                //Función que emite esta opcion, si esta fue seleccionada
+                socket.emit('opcionesTiempos', alternativa);
+                alert("Seleccion\u00F3: Tr\u00E1fico equilibrado");
+            } else if (alternativa == 2) {
+                //Función que emite esta opcion, si esta fue seleccionada
+                socket.emit('opcionesTiempos', alternativa);
+                alert("Seleccion\u00F3: Mayor tr\u00E1fico vehicular");
+            } else if (alternativa == 3) {
+                //Función que emite esta opcion, si esta fue seleccionada
+                socket.emit('opcionesTiempos', alternativa);
+                alert("Seleccion\u00F3: Mayor tr\u00E1fico peatones");
+            }
+        };
+    </script>
+</head>
+<body>
+    <div class="contenedor">
+        <!-- caja del semáforo1-->
+        <div class="semaforo1">
+            <!-- luz roja-->
+            <div id="c1">
+            </div>
+            <!-- luz verde-->
+            <div id="c2">
+            </div>
+        </div>
+        <!-- caja del semáforo2-->
+        <div class="semaforo2">
+            <!-- luz roja-->
+            <div id="d1">
+            </div>
+            <!-- luz amarilla-->
+            <div id="d2">
+            </div>
+            <!-- luz verde-->
+            <div id="d3">
+            </div>
+        </div>
+        <!-- caja del semáforo3-->
+        <div class="semaforo3">
+            <!-- luz roja-->
+            <div id="e1">
+            </div>
+            <!-- luz verde-->
+            <div id="e2">
+            </div>
+        </div>
+        <!-- caja contenedora de pantallas de texto y pulsadores-->
+        <div class="cajaInferior1">
+            <h4>Peatones</h4>
+            <p class="pantalla1" id="scr1">
+                </p>
+            <p class="pulsador1">
+                <a id="p1" onclick="acortar1(1);"></a>
+                </p>
+        </div>
+        <!-- caja contenedora de pantallas de texto y pulsadores-->
+        <div class="cajaInferior2">
+            <h4>Peatones</h4>
+            <p class="pantalla2" id="scr2">
+                </p>
+            <p class="pulsador2">
+                <a id="p2" onclick="acortar2(1);"></a>
+                </p>
+        </div>
+    </div>
+        <h3 id="contador"></h3>
+        <form id="ajusteTiempos" name="formulario" action="#">
+         <h3>Seleccione un modo de tiempo</h3>
+         <select name="alternativa" id="alternativa">
+            <option value="1">Tr&aacute;fico equilibrado</option>
+            <option value="2">Mayor tr&aacute;fico vehicular</option>
+            <option value="3">Mayor tr&aacute;fico peatones</option>
+         </select><br><br><br>
+         <input type="button" onclick="cambio()" value="Enviar"/>
+         <br><br><br>
+        </form>
+</body>
+</html>

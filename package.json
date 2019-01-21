@@ -1,0 +1,9 @@
+{
+  "name": "servidor-sermaforo",
+  "version": "1.0.0",
+  "description": "interacción de app web con semáforo físico",
+  "author": "Carlos Salazar",
+  "main": "serverSemaforo.js",
+  "scripts": {
+    "start": "node serverSemaforo.js & node semaforo.js"}
+}
